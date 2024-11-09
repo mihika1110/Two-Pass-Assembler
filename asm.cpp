@@ -234,9 +234,6 @@ int get_operand_type(string s) {
     return is_valid_label(s) ? 1 : -1;
 }
 
-
-
-
 // Helper function to split line by label and spaces, similar to original logic
 void split_line(const string &line, string &label, string &mnemonic, string &operand) {
     label = mnemonic = operand = "";
