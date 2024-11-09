@@ -1,99 +1,121 @@
-; Program Start
-start:      ldc 0x1000         ; Set up stack pointer
-            a2sp
-            adj -1
-            ldc 11             ; Number of elements to sort
-            stl 0              ; Store count
-            ldc array          ; Load base address of array
-            call sort          ; Call sort function
-            HALT               ; End of program
+; outline of bubble sort program
+            ldc 0x1000 
+            a2sp 
+            adj -1 
+            ldc 11 
+            stl 0 
+            ldc array
+            call sort
+            HALT 
+; 
+; Areg= return address 
+; Breg= address of elements 
+; SP+0= number of elements sort
+; int* sort(int* in,int count)
+;{
+;   int x;
+;   int y;
+;   int temp;
+;   for(x=0;x < count-1;x++)
+;   {
+;       for(y=1;y<count-x;y++)
+;       {
+;           if(((in+y))>((in+y-1)))
+;           {
+;               temp=(*(in+y-1));
+;               ((in+y-1))=((in+y));
+;               (*(in+y))=temp;
+;           }
+;       }
+;   }
+;   exit:return;
+;} 
 
-sort:       adj -1             ; Adjust stack for local variables
-            stl 3              ; Save return address in local 3
-            stl 4              ; Save base address of elements in local 4
-
+sort:       adj -1
+            stl 0               ; save return address
+            stl 2               ; save address of elements
+            adj -3
             ldc 0
-            stl 2              ; x = 0
-
-loop_out:   ldl 0              ; Load count
-            ldl 2              ; Load x
-            sub
+            stl 0               ; save temp
             ldc 1
-            sub
-            brz done           ; If x >= count-1, exit outer loop
+            stl 1               ; save y
+            ldc 0
+            stl 2               ; save x
 
+loop_out:   ldl 4               ; load count
+            ldl 2               ; load x
+            sub                 ; count - x
             ldc 1
-            stl 1              ; Initialize y = 1
+            sub                 ; count-1-x
+            brz done
+            ldc 1
+            stl 1               ; y = 1
 
-loop_in:    ldl 0              ; Load count
-            ldl 2              ; Load x
-            sub
-            ldl 1              ; Load y
-            sub
-            brz addx           ; If y >= count - x, exit inner loop
-
-            ; Load addresses for comparison
-            ldl 4              ; Load base address of elements
-            ldl 1              ; Load y
-            add
-            stl 5              ; Store address of array[y] in local 5
-
-            ldl 4              ; Load base address of elements
+loop_in:    ldl 4               ; load count
+            ldl 2               ; load x
+            sub                 ; count - x
+            ldl 1               ; load y 
+            sub                 ; count - x - y
+            brz addx
+            ldl 5               ; load address of elements
             ldl 1
             ldc 1
-            sub                ; Calculate address of array[y-1]
-            add
-            stl 6              ; Store address of array[y-1] in local 6
-
-            ; Compare array[y-1] and array[y]
-            ldl 6              ; Load address of array[y-1]
-            ldnl 0             ; Load array[y-1]
-            ldl 5              ; Load address of array[y]
-            ldnl 0             ; Load array[y]
             sub
-            brlz addy          ; If array[y-1] <= array[y], skip swap
-
-            ; Swap logic
-swap:       ldl 6              ; Load address of array[y-1]
-            ldnl 0             ; Load array[y-1] into A
-            stl 7              ; Store it in temp (local 7)
-
-            ldl 5              ; Load address of array[y]
-            ldnl 0             ; Load array[y]
-            ldl 6              ; Load address of array[y-1]
-            stnl 0             ; array[y-1] = array[y]
-
-            ldl 7              ; Load temp (array[y-1])
-            ldl 5              ; Load address of array[y]
-            stnl 0             ; array[y] = temp
-
-addy:       ldc 1
-            ldl 1              ; Load y
+            ldl 5
             add
-            stl 1              ; y++
+            stl 6
+            ldl 1
+            ldl 5
+            add
+            stl 7
+            ldl 7
+            ldnl 0
+            ldl 6
+            ldnl 0
+            sub                 ; array[y-1] - array[y]
+            brlz swap
+            br addy
 
-            br loop_in         ; Continue inner loop
+swap:       ldl 6               ; load address of elements
+            ldnl 0              ; array[y-1]
+            stl 0               ; temp = array[y-1]
+            ldl 7
+            ldnl 0              ; array[y]
+            ldl 6
+            stnl 0              ; array[y-1] = array[y]
+            ldl 0               ; load temp
+            ldl 7
+            stnl 0              ; array[y] = temp
+
+; increment
+addy:       ldc 1
+            ldl 1               ; load y
+            add                 ; y++
+            stl 1               ; save y++
+            br loop_in
 
 addx:       ldc 1
-            ldl 2              ; Load x
-            add
-            stl 2              ; x++
+            ldl 2               ; load x 
+            add                 ; x++
+            stl 2
+            ldc 1
+            ldl 5
+            add                 ; array++
+            br loop_out
 
-            br loop_out        ; Continue outer loop
-
-done:       ldl 3              ; Load return address
-            adj 5              ; Restore stack pointer and return
+done:       ldl 3               ; load return address
+            adj 5               ; sp = array
             return
 
-; Data array for sorting
-array:      data 9
-            data 8
-            data 7
-            data 6
-            data 5
-            data 4
-            data 3
+; Array data
+array:      data 9 
+            data 8 
+            data 7 
+            data 6 
+            data 5 
+            data 4 
+            data 3 
             data 2
-            data 1
+            data 1 
             data 0
             data 0
