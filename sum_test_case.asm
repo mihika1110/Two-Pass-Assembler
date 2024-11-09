@@ -1,4 +1,3 @@
-
 ; Program Start
 start:      ldc n           ; Load the address of n
             ldnl 0          ; Load the value of n into A (A = n)
