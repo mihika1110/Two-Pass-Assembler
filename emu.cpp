@@ -1,26 +1,27 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// Declaring global registers and control variables
 int accumulator_A, accumulator_B, program_counter, stack_pointer, index, total_instructions, execution_status;
 
 // Struct to group emulator registers
 struct Registers {
-    int A = 0;
-    int B = 0;
+    int A = 0;    // Accumulator A
+    int B = 0;    // Accumulator B
     int PC = 0;  // Program Counter
     int SP = 0;  // Stack Pointer
 };
 
-// Struct to group execution-related variables
+// Struct to group/manage execution-related variables
 struct ExecutionStatus {
     int index = 0;
     int total_instructions = 0;
     int status = 0;
 };
 
-// Global variables
+// Global memory and machine code
 int main_memory[1 << 24] = {0};  // 24-bit addressable memory
-vector<string> machine_code_lines;
+vector<string> machine_code_lines;  // Stores lines of machine code
 Registers registers;  // Register object to hold A, B, PC, SP
 ExecutionStatus execution;  // Execution status object
 array<int, 2> memory_change = {0};  // To track memory changes, if any
@@ -33,6 +34,7 @@ const vector<string> mnemonics = {
     "br", "HALT"
 };
 
+// Instruction set functions
 void load_constant(int value) { accumulator_B = accumulator_A ; accumulator_A = value; }
 void add_constant(int value) { accumulator_A = accumulator_A + value; }
 void load_local(int offset) {
@@ -79,10 +81,10 @@ void (*instruction_functions[])(int) = {load_constant, add_constant, load_local,
                                        adjust_stack_pointer, accumulator_to_stack_pointer, stack_pointer_to_accumulator, call_procedure,
                                        return_procedure, branch_if_zero, branch_if_less_than_zero, branch};
 
-
+// Converts decimal to hexadecimal format for memory addresses or values
 string decimal_to_hexadecimal_conversion(unsigned int number) {
     const char hexadecimal_digits[] = "0123456789abcdef";
-    string hexadecimal_representation(8, '0');  // Start with a string of 8 '0's
+    string hexadecimal_representation(8, '0'); // Initializing as string of 8 '0's
 
     for (int i = 7; i >= 0; i--) {           // Fill the string from right to left
         hexadecimal_representation[i] = hexadecimal_digits[number % 16];  // Get the last hex digit
@@ -92,6 +94,7 @@ string decimal_to_hexadecimal_conversion(unsigned int number) {
     return hexadecimal_representation;
 }
 
+// Load machine code from binary file
 void load_machine_code() {
     cout << "Enter file name (e.g., machineCode.o): ";
     string file_name;
@@ -123,6 +126,7 @@ void load_machine_code() {
     }
 }
 
+// Displaying emulator welcome message and command options
 void function_to_display_welcome_message() {
     cout << "Welcome to the Emulator!" << endl;
     cout << "\nAvailable Commands:\n" << endl;
@@ -140,7 +144,7 @@ void function_to_display_welcome_message() {
     cout << "\nEnter a command to proceed." << endl;
 }
 
-
+// Writing a function to display memory dump
 void function_to_display_memory_dump() {
     int memory_size = static_cast<int>(machine_code_lines.size());
 
@@ -156,6 +160,7 @@ void function_to_display_memory_dump() {
     }
 }
 
+// Writing function to display the registers' current state
 void function_to_display_registers() {
     cout << "\n======================== Emulator Registers ========================\n";
     cout << "|   Register   |   Value (Hex)   |" << endl;
@@ -168,7 +173,6 @@ void function_to_display_registers() {
     cout << "|   Mnemonic   |   " << mnemonics[program_counter] << endl;
     cout << "====================================================================\n";
 }
-
 
 void function_to_display_read_operations() {
     cout << "\n============= Memory Read Operation =============\n";
@@ -185,8 +189,8 @@ void function_to_display_write_operations() {
     cout << "====================================================================\n";
 }
 
-
-void displayInstructionSet() {
+// Function to display ISA (Instruction Set Architecture)
+void display_instruction_set() {
     cout << "Instruction Set:\n" << endl;
 
     cout << left << setw(7) << "Sr. No."
@@ -260,7 +264,7 @@ bool function_to_start_emulator() {
     map<string, function<void()>> command_map = {
         {"-dump", function_to_display_memory_dump},
         {"-reg", function_to_display_registers},
-        {"-isa", displayInstructionSet}
+        {"-isa", display_instruction_set}
     };
 
     map<string, function<bool()>> command_map_with_return = {
