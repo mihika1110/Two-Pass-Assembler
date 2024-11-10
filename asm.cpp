@@ -84,29 +84,29 @@ string decimal_to_hexadecimal_conversion(int number, int bits) {
     return hexadecimal_string;
 }
 
-
+// initializes the opcode map with mnemonics, opcodes, and operand types
 void initialize_opcodes() {
-    opcode_map["data"] = {"", 1};
-    opcode_map["ldc"] = {"00", 1};
-    opcode_map["adc"] = {"01", 1};
-    opcode_map["ldl"] = {"02", 2};
-    opcode_map["stl"] = {"03", 2};
-    opcode_map["ldnl"] = {"04", 2};
-    opcode_map["stnl"] = {"05", 2};
-    opcode_map["add"] = {"06", 0};
-    opcode_map["sub"] = {"07", 0};
-    opcode_map["shl"] = {"08", 0};
-    opcode_map["shr"] = {"09", 0};
-    opcode_map["adj"] = {"0A", 1};
-    opcode_map["a2sp"] = {"0B", 0};
-    opcode_map["sp2a"] = {"0C", 0};
-    opcode_map["call"] = {"0D", 2};
-    opcode_map["return"] = {"0E", 0};
-    opcode_map["brz"] = {"0F", 2};
-    opcode_map["brlz"] = {"10", 2};
-    opcode_map["br"] = {"11", 2};
-    opcode_map["HALT"] = {"12", 0};
-    opcode_map["SET"] = {"", 1};
+    opcode_map["data"] = {"", 1};  //stores variables in memory
+    opcode_map["ldc"] = {"00", 1}; // load constant
+    opcode_map["adc"] = {"01", 1}; // add constant
+    opcode_map["ldl"] = {"02", 2}; // load local variable
+    opcode_map["stl"] = {"03", 2}; // store local variable
+    opcode_map["ldnl"] = {"04", 2}; // load non local variable
+    opcode_map["stnl"] = {"05", 2};  // store non local variable
+    opcode_map["add"] = {"06", 0};  // add operation
+    opcode_map["sub"] = {"07", 0};  // subtract operation
+    opcode_map["shl"] = {"08", 0};  // shift left
+    opcode_map["shr"] = {"09", 0};  // shift right
+    opcode_map["adj"] = {"0A", 1};  // adjust stack pointer
+    opcode_map["a2sp"] = {"0B", 0}; // transfer accumulator to stack pointer
+    opcode_map["sp2a"] = {"0C", 0}; // transfer stack pointer to accumulator
+    opcode_map["call"] = {"0D", 2}; // call subroutine
+    opcode_map["return"] = {"0E", 0}; // return from subroutine
+    opcode_map["brz"] = {"0F", 2}; //branch if zero
+    opcode_map["brlz"] = {"10", 2}; //branch is less than zero
+    opcode_map["br"] = {"11", 2}; // unconditional branch
+    opcode_map["HALT"] = {"12", 0};  //HALT execution
+    opcode_map["SET"] = {"", 1}; //set variable in memory
 }
 
 void function_to_generate_error(int line, string type) {
@@ -609,5 +609,5 @@ bool is_valid_label(string label) {
     for (char ch : label) {
         if (!(isalnum(ch) || ch == '_')) return false;
     }
-    return true;
+    return true;   // this implies that it's a valid label
 }
