@@ -1,16 +1,26 @@
+/*
+   NAME- MIHIKA
+   ROLL NUMBER-2301CS31
+   ASSEMBLER
+
+   Declaration of Authorship
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 
+// Structure to hold information about each assembly instruction
 struct asm_table { 
-    string label;
-    string mnemonic;
-    string operand;
-    int operand_type;
-    bool label_present;
+    string label;  // Label for instruction
+    string mnemonic;   // Instruction type or we can say Operation code (e.g., ADD, SUB, etc)
+    string operand;    // Operand (e.g., a number or a label) associated with the instruction
+    int operand_type;   // Type of operand (e.g., decimal, hexadecimal)
+    bool label_present;   // Flag to indicate if a label is present
 };
 
-vector<asm_table> asm_data;
-map<string, pair<string, int>> opcode_map;
+// Global variables and data structures
+vector<asm_table> asm_data;                    // stores assembly code information
+map<string, pair<string, int>> opcode_map;     // Maps mnemonics to their opcode and operand type
 vector<pair<int, string>> error_list;
 vector<string> cleaned_code;
 map<string, int> label_map;
@@ -50,18 +60,18 @@ int main() {
     system("pause");
     return 0;
 }
+
 string decimal_to_hexadecimal_conversion(int number, int bits) {
     // Ensure the number fits within the specified number of bits
-    unsigned int mask = (1 << bits) - 1;  // Mask to limit the number of bits
-    unsigned int number = static_cast<unsigned int>(number) & mask;
+    unsigned int masked_number = static_cast<unsigned int>(number) & ((1 << bits) - 1);
 
     // Convert to hexadecimal string
     string hexadecimal_string = "";
     do {
-        int digit = number % 16;
+        int digit = masked_number % 16;
         hexadecimal_string = "0123456789abcdef"[digit] + hexadecimal_string;
-        number = number / 16;
-    } while (number > 0);
+        masked_number = masked_number / 16;
+    } while (masked_number > 0);
 
     // Ensure the result has the correct number of digits (padded with leading zeros if necessary)
     while (hexadecimal_string.length() < (bits / 4)) {
