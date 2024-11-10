@@ -3,7 +3,7 @@ AUTHOR: Mihika
 Roll Number: 2301CS31 
 
 Declaration of Authorship
-This text (txt enxention) file, claims.txt, is part of the assignment of CS2102 at the department of Computer Science and Engineering, Indian Institute of Technology, Patna . 
+This text (txt extension) file, claims.txt, is part of the assignment of CS2102 at the department of Computer Science and Engineering, Indian Institute of Technology, Patna . 
 
 **********************************************************************************************************************************************************************************************************************************************************************************************************************************
 Files:
