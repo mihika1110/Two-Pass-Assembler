@@ -21,14 +21,16 @@ struct asm_table {
 // Global variables and data structures
 vector<asm_table> asm_data;                    // stores assembly code information
 map<string, pair<string, int>> opcode_map;     // Maps mnemonics to their opcode and operand type
-vector<pair<int, string>> error_list;
-vector<string> cleaned_code;
-map<string, int> label_map;
-vector<pair<int, string>> machine_code_list;
-vector<int> program_counters;
-bool is_halt_present = false;
-string asm_file_name;
+vector<pair<int, string>> error_list;           // Keeps track of errors with line numbers
+vector<string> cleaned_code;                    // Stores cleaned and processed lines of assembly code
+map<string, int> label_map;                   // Maps labels to their corresponding line numbers
+vector<pair<int, string>> machine_code_list;   // Stores the generated machine code with line numbers
+vector<int> program_counters;      // Keeps track of program counters for each instruction
+bool is_halt_present = false;     // Flag to check if HALT instruction is present
+string asm_file_name;             // Name of the assembly file to be processed
 
+
+// declaring functions
 bool is_octal(string s);
 bool is_hexadecimal(string s);
 bool is_decimal(string s);
@@ -51,14 +53,15 @@ string pad_zeroes(string s, int length = 6);
 void second_pass();
 void write_output_files();
 
+// this is the main function where the assembler starts execution
 int main() {
-    first_pass();
-    if (function_to_display_errors()) {
-        second_pass();
-        write_output_files();
+    first_pass();               // first pass: it read and process the assembly file
+    if (function_to_display_errors()) {   // if no errors found during the first pass
+        second_pass();                      // second pass generates machine code
+        write_output_files();               // to write the output files (machine code and listing)
     }
-    system("pause");
-    return 0;
+    system("pause");                 // pause the console to view results
+    return 0;       //end of program
 }
 
 string decimal_to_hexadecimal_conversion(int number, int bits) {
