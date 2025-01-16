@@ -1,40 +1,17 @@
 ; outline of bubble sort program
-            ldc 0x1000 
-            a2sp 
-            adj -1 
-            ldc 11 
-            stl 0 
-            ldc array
+            ldc 0x1000 ;Load the constant value 0x1000 (stack base address) into the accumulator
+            a2sp ;Set the stack pointer (SP) to 0x1000
+            adj -1 ;Adjust the stack pointer to allocate space for the return address
+            ldc 11 ;Load the number of elements (11) in the array into the accumulator
+            stl 0  ;Store the number of elements (11) at SP + 0
+            ldc array ;Load the base address of the array into the accumulator
             call sort
             HALT 
-; 
-; Areg= return address 
-; Breg= address of elements 
-; SP+0= number of elements sort
-; int* sort(int* in,int count)
-;{
-;   int x;
-;   int y;
-;   int temp;
-;   for(x=0;x < count-1;x++)
-;   {
-;       for(y=1;y<count-x;y++)
-;       {
-;           if(((in+y))>((in+y-1)))
-;           {
-;               temp=(*(in+y-1));
-;               ((in+y-1))=((in+y));
-;               (*(in+y))=temp;
-;           }
-;       }
-;   }
-;   exit:return;
-;} 
 
-sort:       adj -1
+sort:       adj -1              ; Reserve space on the stack for the return address
             stl 0               ; save return address
-            stl 2               ; save address of elements
-            adj -3
+            stl 2               ; save address of elements 
+            adj -3              ; Reserve space for local variables: temp, x, and y
             ldc 0
             stl 0               ; save temp
             ldc 1
