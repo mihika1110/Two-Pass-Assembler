@@ -1,27 +1,36 @@
+
+/*
+   NAME- MIHIKA
+   ROLL NUMBER-2301CS31
+   EMULATOR
+
+   Declaration of Authorship
+*/
+
+
 #include <bits/stdc++.h>
 using namespace std;
 
-// Declaring global registers and control variables
 int accumulator_A, accumulator_B, program_counter, stack_pointer, index, total_instructions, execution_status;
 
 // Struct to group emulator registers
 struct Registers {
-    int A = 0;    // Accumulator A
-    int B = 0;    // Accumulator B
+    int A = 0;   // register A
+    int B = 0;   // register B
     int PC = 0;  // Program Counter
     int SP = 0;  // Stack Pointer
 };
 
-// Struct to group/manage execution-related variables
+// Struct to group execution-related variables
 struct ExecutionStatus {
-    int index = 0;
-    int total_instructions = 0;
-    int status = 0;
+    int index = 0; //index for instruction tracking 
+    int total_instructions = 0;  //count of total instructions executed
+    int status = 0; // execution status flag
 };
 
-// Global memory and machine code
-int main_memory[1 << 24] = {0};  // 24-bit addressable memory
-vector<string> machine_code_lines;  // Stores lines of machine code
+// Global variables for emulator
+int main_memory[1 << 24] = {0};  // 16 MB (2^24 bytes) memory
+vector<string> machine_code_lines; //stores machine code as hexadecimal strings for display
 Registers registers;  // Register object to hold A, B, PC, SP
 ExecutionStatus execution;  // Execution status object
 array<int, 2> memory_change = {0};  // To track memory changes, if any
@@ -34,57 +43,133 @@ const vector<string> mnemonics = {
     "br", "HALT"
 };
 
-// Instruction set functions
-void load_constant(int value) { accumulator_B = accumulator_A ; accumulator_A = value; }
-void add_constant(int value) { accumulator_A = accumulator_A + value; }
+//emulator instruction implementation
+
+//load constant value to accumulator A
+void load_constant(int value) { 
+    accumulator_B = accumulator_A ; 
+    accumulator_A = value; 
+}
+
+//add constant value to accumulator A
+void add_constant(int value) { 
+    accumulator_A = accumulator_A + value; 
+}
+
+
+//load a value from the local memory offset
 void load_local(int offset) {
     accumulator_B = accumulator_A;
     accumulator_A = main_memory[stack_pointer + offset];
     memory_change = {stack_pointer + offset, 0};
-    execution_status = 1;
+    execution_status = 1;          // 1 for read
 }
+
+//store accumulator A's value to the local memory offset
 void store_local(int offset) {
     memory_change = {main_memory[stack_pointer + offset], accumulator_A};
     main_memory[stack_pointer + offset] = accumulator_A;
-    execution_status = 2;
+    execution_status = 2;        // 2 for write
     accumulator_A = accumulator_B;
 }
+
+//load a non local memory value using offset
 void load_non_local(int offset) {
     accumulator_A = main_memory[accumulator_A + offset];
     memory_change = {stack_pointer + offset, 0};
     execution_status = 1;
 }
+
+//store accumulator B's value to the non local memory offset
 void store_non_local(int offset) {
     memory_change = {main_memory[accumulator_A + offset], accumulator_B};
     main_memory[accumulator_A + offset] = accumulator_B;
     execution_status = 2;
 }
-void add(int unused = 0) { accumulator_A = accumulator_A + accumulator_B; }
-void subtract(int unused = 0) { accumulator_A = accumulator_B - accumulator_A; }
-void shift_left(int unused = 0) { accumulator_A = accumulator_B << accumulator_A; }
-void shift_right(int unused = 0) { accumulator_A = accumulator_B >> accumulator_A; }
-void adjust_stack_pointer(int value) { stack_pointer = stack_pointer + value; }
-void accumulator_to_stack_pointer(int unused = 0) { stack_pointer = accumulator_A; accumulator_A = accumulator_B; }
-void stack_pointer_to_accumulator(int unused = 0) { accumulator_B = accumulator_A; accumulator_A = stack_pointer; }
+
+//defining arithmetic and control operations
+
+//a = a + b
+void add(int unused = 0) { 
+    accumulator_A = accumulator_A + accumulator_B; 
+}
+
+// a = b - a
+void subtract(int unused = 0) { 
+    accumulator_A = accumulator_B - accumulator_A; 
+}
+
+// Function to perform left bitwise shift of accumulator_B by the number of bits in accumulator_A
+// Result is stored in accumulator_A
+void shift_left(int unused = 0) { 
+    accumulator_A = accumulator_B << accumulator_A; 
+}
+
+// Function to perform right bitwise shift of accumulator_B by the number of bits in accumulator_A
+// Result is stored in accumulator_A
+void shift_right(int unused = 0) { 
+    accumulator_A = accumulator_B >> accumulator_A; 
+}
+
+// Function to adjust the stack pointer (SP) by a given value
+// The value is added to stack_pointer, allowing stack manipulation
+void adjust_stack_pointer(int value) { 
+    stack_pointer = stack_pointer + value; 
+}
+
+// Function to transfer the value in accumulator_A to the stack pointer (SP)
+// Then, accumulator_A is set to the value in accumulator_B
+// Useful for setting up stack frame or switching contexts
+void accumulator_to_stack_pointer(int unused = 0) { 
+    stack_pointer = accumulator_A; accumulator_A = accumulator_B; 
+}
+
+// Function to transfer the stack pointer (SP) value to accumulator_A
+// accumulator_B is set to the previous value in accumulator_A
+// Useful for retrieving stack frame or pointer values
+void stack_pointer_to_accumulator(int unused = 0) { 
+    accumulator_B = accumulator_A; accumulator_A = stack_pointer; 
+}
+
+// procedure call and return instructions
+
 void call_procedure(int offset) {
     accumulator_B = accumulator_A;
     accumulator_A = program_counter;
     program_counter = program_counter + offset;
 }
-void return_procedure(int unused = 0) { program_counter = accumulator_A; accumulator_A = accumulator_B; }
-void branch_if_zero(int offset) { if (accumulator_A == 0) program_counter = program_counter + offset; }
-void branch_if_less_than_zero(int offset) { if (accumulator_A < 0) program_counter = program_counter + offset; }
-void branch(int offset) { program_counter = program_counter + offset; }
 
+void return_procedure(int unused = 0) { 
+    program_counter = accumulator_A; 
+    accumulator_A = accumulator_B; 
+}
+
+//branch instructions
+
+void branch_if_zero(int offset) { 
+    if (accumulator_A == 0) 
+    program_counter = program_counter + offset; 
+}
+
+void branch_if_less_than_zero(int offset) { 
+    if (accumulator_A < 0) 
+    program_counter = program_counter + offset; 
+}
+
+void branch(int offset) { 
+    program_counter = program_counter + offset; 
+}
+
+// array of function pointers to execute corresponding opcode function
 void (*instruction_functions[])(int) = {load_constant, add_constant, load_local, store_local, load_non_local,
                                        store_non_local, add, subtract, shift_left, shift_right,
                                        adjust_stack_pointer, accumulator_to_stack_pointer, stack_pointer_to_accumulator, call_procedure,
                                        return_procedure, branch_if_zero, branch_if_less_than_zero, branch};
 
-// Converts decimal to hexadecimal format for memory addresses or values
+//function to convert decimal numbers to hexadecimal (8-character string)
 string decimal_to_hexadecimal_conversion(unsigned int number) {
     const char hexadecimal_digits[] = "0123456789abcdef";
-    string hexadecimal_representation(8, '0'); // Initializing as string of 8 '0's
+    string hexadecimal_representation(8, '0');  // Start with a string of 8 '0's
 
     for (int i = 7; i >= 0; i--) {           // Fill the string from right to left
         hexadecimal_representation[i] = hexadecimal_digits[number % 16];  // Get the last hex digit
@@ -94,22 +179,22 @@ string decimal_to_hexadecimal_conversion(unsigned int number) {
     return hexadecimal_representation;
 }
 
-// Load machine code from binary file
+//function to load machine code from a file into main memory
 void load_machine_code() {
     cout << "Enter file name (e.g., machineCode.o): ";
     string file_name;
     getline(cin, file_name);  // Use getline to handle spaces
 
-    ifstream input_file(file_name, ios::binary);
+    ifstream input_file(file_name, ios::binary);  //ifstream - read data from file && ios:: - ensures the file is read as binary data, not text.
     if (!input_file) {
         cerr << "Error: Unable to open file " << file_name << endl;
         return;
     }
 
     unsigned int instruction;
-    int position = 0;
+    int position = 0;      //machine code instructions are often represented as integers
 
-    while (input_file.read(reinterpret_cast<char*>(&instruction), sizeof(instruction))) {
+    while (input_file.read(reinterpret_cast<char*>(&instruction), sizeof(instruction))) { //allows the reading of binary data into the memory space of the instruction variable
         if (position < sizeof(main_memory) / sizeof(main_memory[0])) {
             main_memory[position++] = instruction;
             machine_code_lines.emplace_back(decimal_to_hexadecimal_conversion(instruction));
@@ -126,7 +211,6 @@ void load_machine_code() {
     }
 }
 
-// Displaying emulator welcome message and command options
 void function_to_display_welcome_message() {
     cout << "Welcome to the Emulator!" << endl;
     cout << "\nAvailable Commands:\n" << endl;
@@ -144,7 +228,7 @@ void function_to_display_welcome_message() {
     cout << "\nEnter a command to proceed." << endl;
 }
 
-// Writing a function to display memory dump
+//display the contents of machine_code_lines in a memory dump-like format
 void function_to_display_memory_dump() {
     int memory_size = static_cast<int>(machine_code_lines.size());
 
@@ -160,7 +244,6 @@ void function_to_display_memory_dump() {
     }
 }
 
-// Writing function to display the registers' current state
 void function_to_display_registers() {
     cout << "\n======================== Emulator Registers ========================\n";
     cout << "|   Register   |   Value (Hex)   |" << endl;
@@ -173,6 +256,7 @@ void function_to_display_registers() {
     cout << "|   Mnemonic   |   " << mnemonics[program_counter] << endl;
     cout << "====================================================================\n";
 }
+
 
 void function_to_display_read_operations() {
     cout << "\n============= Memory Read Operation =============\n";
@@ -189,8 +273,8 @@ void function_to_display_write_operations() {
     cout << "====================================================================\n";
 }
 
-// Function to display ISA (Instruction Set Architecture)
-void display_instruction_set() {
+
+void displayInstructionSet() {
     cout << "Instruction Set:\n" << endl;
 
     cout << left << setw(7) << "Sr. No."
@@ -220,29 +304,37 @@ void display_instruction_set() {
 }
 
 bool function_to_execute_instructions(int operation, int maximum_executions = (1 << 25)) {
+    // Begin a loop to execute instructions, with a limit on the number of executions .. the loop will run till the time max executions > 0
     while (maximum_executions-- && program_counter < machine_code_lines.size()) {
         total_instructions++;
+        // Check if we've exceeded memory bounds or if we've executed too many instructions
+        // If so, print "Segmentation Fault" and return false to stop execution
         if (program_counter >= machine_code_lines.size() || total_instructions > (int)3e7) {
             cout << "Segmentation Fault" << endl;
             return false;
         }
+        // Retrieve the current instruction from the machine code lines using the program counter
         string current_instruction = machine_code_lines[program_counter];
+        // Extract the opcode (bits 6-7 in the instruction, represented as hexadecimal)
         int opcode = stoi(current_instruction.substr(6, 2), 0, 16);
         if (opcode == 18) {
             cout << "HALT found" << endl;
             cout << total_instructions << " statements were executed in total" << endl;
             return true;
         }
-        int operand = stoi(current_instruction.substr(0, 6), 0, 16);
-        if (operand >= (1 << 23)) {
-            operand -= (1 << 24);
+        int operand = stoi(current_instruction.substr(0, 6), 0, 16);   //substr(6,2) extracts the substring at position 6-7(2 char) representing opcode in hex & stoi(.. 0,16) converts hex string to int
+        if (operand >= (1 << 23)) { //checking if operand >= 2^23 (interpreting it as a 24 bit signed int)
+            operand -= (1 << 24); // if it is true subtract 2^24 to convert it from unsigned to signed representation (for -ve numbers)
         }
+        // If maximum_executions is zero, call a function to display the current register values
         if (maximum_executions == 0)
             function_to_display_registers();
+        // Call the appropriate function for the current instruction based on its opcode
+        // The operand is passed to the instruction function for execution
         (instruction_functions[opcode])(operand);
         if (operation == 1 && execution_status == 1) {
-            function_to_display_read_operations();
-            execution_status = 0;
+            function_to_display_read_operations();  // Display information about memory reads
+            execution_status = 0;  // Reset execution status after displaying read operations
         }
         else if (operation == 2 && execution_status == 2) {
             function_to_display_write_operations();
@@ -264,7 +356,7 @@ bool function_to_start_emulator() {
     map<string, function<void()>> command_map = {
         {"-dump", function_to_display_memory_dump},
         {"-reg", function_to_display_registers},
-        {"-isa", display_instruction_set}
+        {"-isa", displayInstructionSet}
     };
 
     map<string, function<bool()>> command_map_with_return = {
@@ -295,10 +387,11 @@ bool function_to_start_emulator() {
 }
 
 int main() {
-    load_machine_code();
-    function_to_display_welcome_message();
+    load_machine_code(); //load machine code into memory
+    function_to_display_welcome_message(); //display the welcome message
+    // Main loop to receive user commands and execute corresponding functions
     while (true) {
-       function_to_start_emulator();
+       function_to_start_emulator(); 
     }
     return 0;
 }
