@@ -5,36 +5,28 @@ Roll Number: 2301CS31
 Declaration of Authorship
 This text (txt extension) file, claims.txt, is part of the assignment of CS2102 at the department of Computer Science and Engineering, Indian Institute of Technology, Patna . 
 
-**********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 Files:
 
-*All the files I submitted, asm.cpp and emu.cpp, have my name and roll number at the start, along with a declaration of authorship.
+All the files I submitted, asm.cpp and emu.cpp, have my name and roll number at the start, along with a declaration of authorship.
 
-I have uploaded asm.cpp , emu.cpp , bubble_sort_test_case.asm , sum_test_case.asm , subtraction.asm , test1.asm , test2.asm , test3.asm , test4.asm. Along with this i am also uploading the evidence for Assembler including the output files from all the test examples uploaded by me. 
+I have uploaded asm.cpp , emu.cpp , bubble_sort.asm , product.asm, subtract.asm, sum.asm , swap.asm , test1.asm , test2.asm , test3.asm , test4.asm. Along with this i am also uploading the evidence for Assembler including the output files from all the test examples uploaded by me. 
 
 All the test files have been tested and work properly. 
 
 
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 Compilation instructions:
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
     
 Windows:
-    g++ asm.cpp -o asm
-    asm <insert_file_name>.asm
-Ubuntu:
-    g++ asm.cpp -o asm
-    ./asm <insert_file_name>.asm
-
-Footnote:
-    * Input files(the .asm file) must be present in the same folder where the code is executed
-    * Ouput files -> if there are no errors then <insert_file_name>.o file and <insert_file_name>.l files will be produced in same folder.
+    g++ asm.cpp -o asmtest 
+    using this command executable file "asmtest" will be generated.
 
 
-
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 Program format and structure:
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 
 The assembler:
     
@@ -46,18 +38,18 @@ The assembler:
 
     * asm.cpp is the main and only file of my assembler
 
-    * It is a 2 pass assembler (implemented in asm.cpp)
+    * It is a 2-pass assembler (implemented in asm.cpp)
     
     * Outputs the required correct information in the form of 3 things :
-       *  the errors and warnings on terminal as well as log file if not assembled properly.
+       *  the errors and warnings on the terminal as well as the log file if not assembled properly.
        *  .l file for listing 
        *  .o file for machine code 
 
-    * All important errors are diagnosed along with thier line numbers ( unknown instruction , no such label , duplicate label )
+    * All important errors are diagnosed along with their line numbers ( unknown instruction, no such label, duplicate label )
 
     * Along with errors it also generates Warnings whenever there is a label declared but has not been used in the code.
   
-    * Comments or self descriptive variable names have been used.
+    * Comments or self-descriptive variable names have been used.
 
     * Advanced Listing File gets generated that is bytes of instruction along with that instructions mnemonics .
 
@@ -69,88 +61,128 @@ The assembler:
 
 
 
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 Testing: (using a windows machine)
-***********************************************************************************************************************************************************************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 The assembler:
 
-I have tested  6 examples(1 example from doc , 4 test files and bubblesort) shown as below. The errors only occurred in the file test2.asm and the program immediately stopped on the second pass displaying errors in the terminal window.
+I have tested 9 examples(4 test files, sum , swap, product, subtract and bubble_sort) as shown below. The errors only occurred in the file test2.asm and the program immediately stopped on the second pass displaying errors in the terminal window.
 
 The others were tested without any errors detected and produced listing file and machine readable object file, for each example.
 
 
 1)
-#Input: asm test1.asm
+#Input: test1.asm
 #Output: 
-Warning at Line 0 : Label with name "label" not used but declared
-Warning at Line 12 : HALT instruction not found .
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Compiled without errors!!!
-Logs generated in: test1log.txt
-Machine code generated in: test1.o
-Listing generated in: test1.l
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STATUS: Assembly completed successfully. No errors detected!
+WARNING: Warning: HALT instruction missing.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Compiled without errors!!!
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 2)
-#Input: asm test2.asm
+#Input: test2.asm
 #Output: 
 Failed to Assemble!!
-Error at Line 4 : Duplicate label definition of "label"
-Error at Line 5 : No such label as "nonesuch" has been declared
-Error at Line 6 : Not a number or a valid Label
-Error at Line 7 : Missing Operand
-Error at Line 8 : Unexpected Operand
-Error at Line 9 : Extra operand on end of line
-Error at Line 9 : Not a number or a valid Label
-Error at Line 10 : Bogus Label Name
-Error at Line 11 : Bogus Mnemonic
-Error at Line 12 : Bogus Mnemonic                                                                                      
+
+Line      | Description
+--------------------------------------------------
+5         | Error at line: 4 -- Type: Multiple declaration of label: label
+6         | Error at line: 5 -- Type: No such label / data variable
+7         | Error at line: 6 -- Type: Invalid number
+8         | Error at line: 7 -- Type: Invalid OPCode-Syntax combination
+9         | Error at line: 8 -- Type: Invalid OPCode-Syntax combination
+10        | Error at line: 9 -- Type: Invalid number
+11        | Error at line: 10 -- Type: Invalid label name
+12        | Error at line: 11 -- Type: Invalid Mnemonic
+13        | Error at line: 12 -- Type: Invalid Mnemonic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****logs are getting generated by the name "logFile.txt" everytime because i have created folder so every testcase i took so in different folders we can have file named same in different folders. ****                                                                            
 
 3)
-#Input: asm test3.asm
+#Input: test3.asm
 #Output: 
-Warning at Line 12 : HALT instruction not found .
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STATUS: Assembly completed successfully. No errors detected!
+WARNING: Warning: HALT instruction missing.
+         A HALT instruction is required for proper termination. Please check if its omission was intentional.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Compiled without errors!!!
-Logs generated in: test3log.txt
-Machine code generated in: test3.o
-Listing generated in: test3.l
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 4)
-#Input: asm test4.asm
+#Input: test4.asm
 #Output: 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Compiled without errors!!!
-Logs generated in: test4log.txt
-Machine code generated in: test4.o
-Listing generated in: test4.l
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 5)
-#Input: asm test.asm
+#Input: bubble_sort.asm
 #Output: 
-Warning at Line 12 : HALT instruction not found .
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Assembly completed successfully. No errors detected!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Compiled without errors!!!
-Logs generated in: testlog.txt
-Machine code generated in: test.o
-Listing generated in: test.l
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 6)
-#Input: asm bubblesort.asm
+#Input: product.asm
 #Output: 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Compiled without errors!!!
-Logs generated in: bubblesortlog.txt
-Machine code generated in: bubblesort.o
-Listing generated in: bubblesort.l
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Line      | Description
+--------------------------------------------------
+18        | Error at line: 17 -- Type: Invalid Mnemonic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 7)
-#Input: asm false_test.asm
+#Input: subtract.asm
 #Output: 
-Error in Opening Input file
+
+Line      | Description
+--------------------------------------------------
+4         | Error at line: 3 -- Type: Invalid OPCode-Syntax combination
+6         | Error at line: 5 -- Type: Invalid OPCode-Syntax combination
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+8)
+#Input: sum.asm
+#Output: 
+STATUS: Assembly completed successfully. No errors detected!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+9)
+#Input: swap.asm
+#Output: 
+STATUS: Assembly completed successfully. No errors detected!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Logs generated in: logFile.txt
+Machine code generated in: machineCode.o
+Listing generated in: listCode.l
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
