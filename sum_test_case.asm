@@ -3,10 +3,10 @@ start:      ldc n           ; Load the address of n
             ldnl 0          ; Load the value of n into A (A = n)
             stl 1           ; Store n in local variable 1 (n counter)
 
-            ldc 0           ; Initialize sum to 0
+            ldc 0           ;sum=0
             stl 0           ; Store sum in local variable 0
 
-            ldc 0           ; Initialize i = 0 (index)
+            ldc 0           ;i=0
             stl 2           ; Store i in local variable 2
 
 loop:       ldl 2           ; Load i into A
@@ -27,22 +27,20 @@ loop:       ldl 2           ; Load i into A
             adc 1           ; i = i + 1
             stl 2           ; Store updated i
 
-            br loop         ; Repeat loop
+            br loop         
 
 end:        ldl 0           ; Load the final sum
             ldc sum         ; Load the address of sum
             stnl 0          ; Store the final sum in memory
 
-            HALT            ; End of the program
+            HALT
 
 ; Define the location of array and sum
-n:           data 5          ; Number of elements in the array
+n:           data 5          ;n
 sum:         data 0          ; Memory location to store the final sum
 
-
-; Array elements
-array_base: data 1          ; array[0] = 1
-            data 2          ; array[1] = 2
-            data 3          ; array[2] = 3
-            data 4          ; array[3] = 4
-            data 5          ; array[4] = 5
+array_base: data 1          
+            data 2  
+            data 3 
+            data 4  
+            data 5   
