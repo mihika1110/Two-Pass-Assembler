@@ -1,3 +1,4 @@
+
 /*
    NAME- MIHIKA
    ROLL NUMBER-2301CS31
@@ -9,65 +10,139 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// Structure to hold information about each assembly instruction
+//structure to create asm table
 struct asm_table { 
-    string label;  // Label for instruction
-    string mnemonic;   // Instruction type or we can say Operation code (e.g., ADD, SUB, etc)
-    string operand;    // Operand (e.g., a number or a label) associated with the instruction
-    int operand_type;   // Type of operand (e.g., decimal, hexadecimal)
-    bool label_present;   // Flag to indicate if a label is present
+    string label;     //instruction label 
+    string mnemonic;  // name of instruction
+    string operand;   // operand assi=ociated with the instruction
+    int operand_type;  //type of the operand(decinal, hexadecimal, octal or label)
+    bool label_present; // flag indicating if the label is present
 };
 
-// Global variables and data structures
-vector<asm_table> asm_data;                    // stores assembly code information
-map<string, pair<string, int>> opcode_map;     // Maps mnemonics to their opcode and operand type
-vector<pair<int, string>> error_list;           // Keeps track of errors with line numbers
-vector<string> cleaned_code;                    // Stores cleaned and processed lines of assembly code
-map<string, int> label_map;                   // Maps labels to their corresponding line numbers
-vector<pair<int, string>> machine_code_list;   // Stores the generated machine code with line numbers
-vector<int> program_counters;      // Keeps track of program counters for each instruction
-bool is_halt_present = false;     // Flag to check if HALT instruction is present
-string asm_file_name;             // Name of the assembly file to be processed
+//global variables
+vector<asm_table> asm_data;                 // Assembly data table
+map<string, pair<string, int>> opcode_map;   // Opcode map for mnemonics and their properties
+vector<pair<int, string>> error_list;           // List of errors encountered during assembly , int - line number and string - error description
+vector<string> cleaned_code;                // Stores cleaned, formatted code lines
+map<string, int> label_map;                 // Maps labels to program counters or indices
+vector<pair<int, string>> machine_code_list; // Stores generated machine code for each instruction
+vector<int> program_counters;  // Stores program counters for each instruction
+bool is_halt_present = false;  // Flag to check presence of HALT instruction
+string asm_file_name;  // Input assembly file name
 
-
-// declaring functions
-bool is_octal(string s);
-bool is_hexadecimal(string s);
-bool is_decimal(string s);
-bool is_valid_label(string label);
-string decimal_to_hexadecimal_conversion(int number, int bits = 24);
-
-void initialize_opcodes();
-void function_to_generate_error(int line, string type);
-string clean_line(string s, int line);
-void push_set_instructions(vector<string> &temp, string token, string s, int j);
-void implement_set_instruction();
-void process_labels();
-void fill_asm_data(int i, string label, string mnemonic, string operand, int type);
-int get_operand_type(string s);
-void function_to_create_asm_table();
-void function_to_separate_data_segment();
-void first_pass();
-bool function_to_display_errors();
-string pad_zeroes(string s, int length = 6);
-void second_pass();
-void write_output_files();
-
-// this is the main function where the assembler starts execution
-int main() {
-    first_pass();               // first pass: it read and process the assembly file
-    if (function_to_display_errors()) {   // if no errors found during the first pass
-        second_pass();                      // second pass generates machine code
-        write_output_files();               // to write the output files (machine code and listing)
+//check if the string represents a valid octal number
+bool is_octal(string s) {
+    // Check if string is non-empty and starts with '0'
+    if (s.size() < 2 || s[0] != '0') return false;
+    
+    // Ensure all characters are between '0' and '7'
+    for (int i = 1; i < s.size(); i++) {
+        if (s[i] < '0' || s[i] > '7') return false;
     }
-    system("pause");                 // pause the console to view results
-    return 0;       //end of program
+    return true;
 }
 
-string decimal_to_hexadecimal_conversion(int number, int bits) {
-    // Ensure the number fits within the specified number of bits
-    unsigned int masked_number = static_cast<unsigned int>(number) & ((1 << bits) - 1);
+//check if the string represents a valid hexadecimal number
+bool is_hexadecimal(string s) {
+    // Check if the string has "0x" or "0X" prefix and enough length
+    if (s.size() < 3 || s[0] != '0' || (s[1] != 'x' && s[1] != 'X')) return false; //A valid hexadecimal number must start with the prefix 0x or 0X.
+    // s.size() < 3 because 0x already 2 ho chuke hai and we need atleast 1 value now to make it hex
+    // Ensure all characters after "0x" are valid hex digits
+    for (int i = 2; i < s.size(); i++) {
+        if (!((s[i] >= '0' && s[i] <= '9') || 
+              (s[i] >= 'a' && s[i] <= 'f') || 
+              (s[i] >= 'A' && s[i] <= 'F'))) {
+            return false;
+        }
+    }
+    return true;
+}
 
+//check if the string represents a valid decimal number
+bool is_decimal(string s) {
+    // Ensure all characters are digits
+    if (s.empty()) return false;     // empty hai toh decimal ki baat hi nahi aati
+    for (char ch : s) {
+        if (!isdigit(ch)) return false;   // checks if all characters are digits .. if not return false
+    }
+    return true; //If the string is not empty and all characters are digits, it is a valid decimal number.. so return true.
+}
+
+//This function checks whether a string is non empty , starts with a letter or underscore,contains only alphanumeric characters or underscores.
+bool is_valid_label(string label) {
+    // Check that label is non-empty and starts with a letter or underscore
+    if (label.empty() || !(isalpha(label[0]) || label[0] == '_')) return false; //alphanumeric means letters + nummbers
+    
+    // Ensure all characters are alphanumeric or underscore
+    for (char ch : label) {
+        if (!(isalnum(ch) || ch == '_')) return false;
+    }
+    return true;
+}
+
+// Convert a decimal number to a hexadecimal string with the specified bit width
+string decimal_to_hexadecimal_conversion(int number, int bits = 24); // 24 bits means 6 hexadecimal numbers
+
+// Initialize opcode mappings for the assembler
+void initialize_opcodes();
+
+// Function to log errors with line number and error type
+void function_to_generate_error(int line, string type);
+
+// Clean a line of code by removing whitespace, comments, and checking for syntax issues
+string clean_line(string s, int line);
+
+// Push SET instruction-related placeholders for further processing
+void push_set_instructions(vector<string> &temp, string token, string s, int j);
+
+// Implement and process SET instructions in the assembly code
+void implement_set_instruction();
+
+// Identify and map labels in the assembly code
+void process_labels();
+
+// Fill in an entry in the assembly data table with instruction details
+void fill_asm_data(int i, string label, string mnemonic, string operand, int type);
+
+// Determine the operand type (decimal, hex, octal, or label)
+int get_operand_type(string s);
+
+// Parse and process each line of code to populate the assembly table
+void function_to_create_asm_table();
+
+// Separate the data segment from instructions in the cleaned code
+void function_to_separate_data_segment();
+
+// Perform the first pass of the assembler process
+void first_pass();
+
+// Display errors if any, and handle error logging
+bool function_to_display_errors();
+
+// Pad a string with leading zeroes up to a specified length
+string pad_zeroes(string s, int length = 6);
+
+// Perform the second pass to generate machine code for the instructions from assembly code
+void second_pass();
+
+// Write output files (machine code and listing) to disk
+void write_output_files();
+
+int main() {
+    first_pass();
+    if (function_to_display_errors()) {
+        second_pass();
+        write_output_files();
+    }
+    system("pause");
+    return 0;
+}
+
+string decimal_to_hexadecimal_conversion(int number, int bits) { // conversion needed in assembly language programming
+    // Ensure the number fits within the specified number of bits
+    unsigned int masked_number = static_cast<unsigned int>(number) & ((1 << bits) - 1); //This converts the number (which is of type int) into an unsigned int // int stores both + & - but unsigned stores only + 
+    //using cast negative numbers are treated as large positive numbers (without sign extension)
+    
     // Convert to hexadecimal string
     string hexadecimal_string = "";
     do {
@@ -84,40 +159,51 @@ string decimal_to_hexadecimal_conversion(int number, int bits) {
     return hexadecimal_string;
 }
 
-// initializes the opcode map with mnemonics, opcodes, and operand types
-void initialize_opcodes() {
-    opcode_map["data"] = {"", 1};  //stores variables in memory
-    opcode_map["ldc"] = {"00", 1}; // load constant
-    opcode_map["adc"] = {"01", 1}; // add constant
-    opcode_map["ldl"] = {"02", 2}; // load local variable
-    opcode_map["stl"] = {"03", 2}; // store local variable
-    opcode_map["ldnl"] = {"04", 2}; // load non local variable
-    opcode_map["stnl"] = {"05", 2};  // store non local variable
-    opcode_map["add"] = {"06", 0};  // add operation
-    opcode_map["sub"] = {"07", 0};  // subtract operation
-    opcode_map["shl"] = {"08", 0};  // shift left
-    opcode_map["shr"] = {"09", 0};  // shift right
-    opcode_map["adj"] = {"0A", 1};  // adjust stack pointer
-    opcode_map["a2sp"] = {"0B", 0}; // transfer accumulator to stack pointer
-    opcode_map["sp2a"] = {"0C", 0}; // transfer stack pointer to accumulator
-    opcode_map["call"] = {"0D", 2}; // call subroutine
-    opcode_map["return"] = {"0E", 0}; // return from subroutine
-    opcode_map["brz"] = {"0F", 2}; //branch if zero
-    opcode_map["brlz"] = {"10", 2}; //branch is less than zero
-    opcode_map["br"] = {"11", 2}; // unconditional branch
-    opcode_map["HALT"] = {"12", 0};  //HALT execution
-    opcode_map["SET"] = {"", 1}; //set variable in memory
+// Initialize opcode mapping for each mnemonic with associated properties
+void initialize_opcodes() {         //Opcode: The hexadecimal code representing the instruction. Operand size: The number of bytes required by operands for that instruction
+    opcode_map["data"] = {"", 1};          //opcode and bytes in operands
+    opcode_map["ldc"] = {"00", 1};  //value -> 1& offset -> 2 & blank -> 0
+    opcode_map["adc"] = {"01", 1};
+    opcode_map["ldl"] = {"02", 2};
+    opcode_map["stl"] = {"03", 2};
+    opcode_map["ldnl"] = {"04", 2};
+    opcode_map["stnl"] = {"05", 2};
+    opcode_map["add"] = {"06", 0};
+    opcode_map["sub"] = {"07", 0};
+    opcode_map["shl"] = {"08", 0};
+    opcode_map["shr"] = {"09", 0};
+    opcode_map["adj"] = {"0A", 1};
+    opcode_map["a2sp"] = {"0B", 0};
+    opcode_map["sp2a"] = {"0C", 0};
+    opcode_map["call"] = {"0D", 2};
+    opcode_map["return"] = {"0E", 0};
+    opcode_map["brz"] = {"0F", 2};
+    opcode_map["brlz"] = {"10", 2};
+    opcode_map["br"] = {"11", 2};
+    opcode_map["HALT"] = {"12", 0};
+    opcode_map["SET"] = {"", 1};
 }
 
+// Add an error to the error list with line number and description
 void function_to_generate_error(int line, string type) {
-    error_list.push_back({line + 1, "Error at line: " + to_string(line) + " -- Type: " + type});
+    error_list.push_back({line + 1, "Error at line: " + to_string(line) + " -- Type: " + type}); //line+1 bcz line number starts with 1
+
+    // Print table header if it's the first error
+    if (error_list.size() == 1) {
+        cout << left << setw(10) << "Line" << left << setw(40) << "Message" << endl;
+        cout << string(50, '-') << endl;
+    }
+
+    // Print the last error added to the list in table format
+    cout << left << setw(10) << error_list.back().first             // .first = line number
+         << left << setw(40) << error_list.back().second << endl;   // .second = error msg
 }
 
-
+// Clean the line by removing unnecessary spaces and comments, and verifying syntax
 string clean_line(string s, int line) {
     // Remove leading and trailing whitespace
-    s.erase(s.begin(), find_if(s.begin(), s.end(), [](char ch) { return !isspace(ch); }));
-    s.erase(find_if(s.rbegin(), s.rend(), [](char ch) { return !isspace(ch); }).base(), s.end());
+    s.erase(s.begin(), find_if(s.begin(), s.end(), [](char ch) { return !isspace(ch); }));   //erases leading whitespaces
+    s.erase(find_if(s.rbegin(), s.rend(), [](char ch) { return !isspace(ch); }).base(), s.end());  //erases trailing whitespaces
 
     string result;
     bool is_last_was_space = false;
@@ -125,6 +211,7 @@ string clean_line(string s, int line) {
     for (int i = 0; i < s.size(); i++) {
         if (s[i] == ';') break; // Stop at the first semicolon
         
+        //now we have removed all the spaces in the result but now we want to make it readable so adding colon and therefore spaces 
         if (s[i] == ':') {
             result = result + ':'; // Add colon
             if (i + 1 < s.size() && !isspace(s[i + 1])) result = result + ' ';
@@ -141,7 +228,7 @@ string clean_line(string s, int line) {
     }
 
     // Remove any trailing spaces from result
-    if (!result.empty() && result.back() == ' ') result.pop_back();
+    if (!result.empty() && result.back() == ' ') result.pop_back(); //.back means last ka part
 
     // Check for excessive spaces in final result
     int space_count = count(result.begin(), result.end(), ' ');
@@ -150,41 +237,45 @@ string clean_line(string s, int line) {
     return result;
 }
 
+// Function to generate SET instructions in the assembly code as needed
 void push_set_instructions(vector<string> &temp, string token, string s, int j) {
-    if (s.size() <= j + 5) {
+    if (s.size() <= j + 5) {  // (j+5) bcz {s = "label: SET 100"} ab iss mai space SET space (5) & 6th se data shuru hoga
         return;
     }
-    temp.push_back("adj 10000");
-    temp.push_back("stl -1");
+    temp.push_back("adj 10000");  //adjust stack pointer
+    temp.push_back("stl -1");     //store local
     temp.push_back("stl 0");
-    temp.push_back("ldc " + s.substr(j + 6, s.size() - (j + 6)));
+    temp.push_back("ldc " + s.substr(j + 6, s.size() - (j + 6)));   //load constant
     temp.push_back("ldc " + token.substr(0, j));
-    temp.push_back("stnl 0");
-    temp.push_back("ldl 0");
+    temp.push_back("stnl 0");    //store non local
+    temp.push_back("ldl 0");     // load local
     temp.push_back("ldl -1");
     temp.push_back("adj -10000");
 }
-void implement_set_instruction() {
-    vector<string> temp;
+
+void implement_set_instruction() { //The function processes SET instructions by replacing them with data and updates the label mappings accordingly.
+    vector<string> temp;  //temporary storage for processed code lines
     for (int i = 0; i < static_cast<int>(cleaned_code.size()); i++) {
         const string& line = cleaned_code[i];
-        int colon_position = line.find(':');
+        int colon_position = line.find(':');  // Find position of ':' to identify labels
 
-        if (colon_position != string::npos && line.size() > colon_position + 5 && line.substr(colon_position + 2, 3) == "SET") {
+        // Check if line is a SET statement with a label
+        if (colon_position != string::npos && line.size() > colon_position + 5 && line.substr(colon_position + 2, 3) == "SET") { //colon ke baad space uske baad SET
             string label = line.substr(0, colon_position);
-            bool is_existing_label = abs(label_map[label]) == i;
+            bool is_existing_label = abs(label_map[label]) == i; //label is unordered map so nothing like ascending descending .. pehle agar SET mila hai kya agar pehla hoga toh bool=0 agar pehli baar mila toh bool=1
 
             if (is_existing_label) {
-                label_map[label] = static_cast<int>(temp.size());
-                temp.push_back(line.substr(0, colon_position + 1) + " data " + line.substr(colon_position + 6));
-            } else {
+                // Map label to index in temp, replacing SET with data
+                label_map[label] = static_cast<int>(temp.size()); //SET konsi line par hai woh dikh raha hai
+                temp.push_back(line.substr(0, colon_position + 1) + " data " + line.substr(colon_position + 6)); //colon space data space number
+            } else { // If label does not exist, process it with helper function
                 push_set_instructions(temp, label, line, colon_position);
             }
         } else if (!line.empty()) {
-            temp.push_back(line);
+            temp.push_back(line); // Add non-SET lines directly to temp
         }
     }
-    cleaned_code = move(temp);
+    cleaned_code = move(temp); // Replace original cleaned_code with modified temp
 }
 
 
@@ -204,7 +295,7 @@ void process_labels() {
                 }
 
                 // Check for multiple declarations or specific conditions
-                bool is_set_statement = (cleaned_code[i].size() > j + 4 && cleaned_code[i].substr(j + 2, 3) == "SET");
+                bool is_set_statement = (cleaned_code[i].size() > j + 4 && cleaned_code[i].substr(j + 2, 3) == "SET"); //space SET (j+4)
                 bool is_data_statement = (cleaned_code[i].size() > j + 5 && cleaned_code[i].substr(j + 2, 4) == "data");
 
                 if (label_map.count(current_label)) {
@@ -249,28 +340,28 @@ int get_operand_type(string s) {
 
 // Helper function to split line by label and spaces, similar to original logic
 void split_line(const string &line, string &label, string &mnemonic, string &operand) {
-    label = mnemonic = operand = "";
-    int part_index = 0;
+    label = mnemonic = operand = ""; //initialised as empty string
+    int part_index = 0; //konse part ko process kiya jaa raha hai mnemonic=0, operand=1
     string current_part;
     bool label_detected = false;
 
     for (int j = 0; j < line.size(); j++) {
-        char ch = line[j];
+        char ch = line[j];     
         
-        if (ch == ':' && !label_detected) { // Label end detected
+        if (ch == ':' && !label_detected) { // Label end detected //label=variable name 
             label = current_part;
             current_part.clear();
             label_detected = true;
             continue;
         } else if (ch == ' ') { // Space separates parts
             if (!current_part.empty()) {
-                if (part_index == 0) mnemonic = current_part;
+                if (part_index == 0) mnemonic = current_part; //variable name mai space nhi ho sakta toh space aate se hi variable name khatam
                 else if (part_index == 1) operand = current_part;
                 current_part.clear();
                 part_index++;
             }
         } else {
-            current_part = current_part + ch;
+            current_part = current_part + ch; //if not space
         }
     }
     if (!current_part.empty()) {
@@ -284,7 +375,7 @@ void function_to_create_asm_table() {
     int program_counter = 0;
     for (int i = 0; i < (int)cleaned_code.size(); i++) {
         string label, mnemonic, operand;
-        split_line(cleaned_code[i], label, mnemonic, operand);
+        split_line(cleaned_code[i], label, mnemonic, operand); //break each line into three components- label, mnemonic, operand
 
         // Assign label presence
         asm_data[i].label_present = !label.empty();
@@ -306,7 +397,7 @@ void function_to_create_asm_table() {
         }
 
         // Validate mnemonic
-        if (!opcode_map.count(mnemonic)) {
+        if (!opcode_map.count(mnemonic)) {  //18 defined mnemonics ke alawa kuch bhi hai toh invalid 
             function_to_generate_error(i + 1, "Invalid Mnemonic");
             continue;
         }
@@ -322,7 +413,7 @@ void function_to_create_asm_table() {
         fill_asm_data(i, label, mnemonic, operand, operand_type);
 
         // Handle errors for label or invalid operand
-        if (operand_type == 1 && !label_map.count(operand)) {
+        if (operand_type == 1 && !label_map.count(operand)) {  //operand_type == 1 means value(data)
             function_to_generate_error(i + 1, "No such label / data variable");
         } else if (operand_type == -1) {
             function_to_generate_error(i + 1, "Invalid number");
@@ -343,10 +434,10 @@ void function_to_separate_data_segment() {
         // Detect start of data segment by presence of "data" keyword in line
         if (line.find("data") != string::npos) {
             in_data_section = true;
-            data_segment.push_back(line);
+            data_segment.push_back(line); //data segment mai 1-1 line add krte jao
         }
         // Check for label definition that precedes a data declaration
-        else if (!line.empty() && line.back() == ':' && in_data_section) {
+        else if (!line.empty() && line.back() == ':' && in_data_section) { //line ki ending == line.back()
             data_segment.push_back(line);
         }
         // Otherwise, categorize as instruction
@@ -367,13 +458,13 @@ void first_pass() {
     cout << "Enter ASM file name to assemble:" << endl;
     cin >> asm_file_name;
 
-    ifstream infile(asm_file_name);
+    ifstream infile(asm_file_name); //ifstream - input file stream // infile is created to read the contents of the assembly file
     if (!infile) {
-        cerr << "Input file doesn't exist. Ensure the file is in the same directory as the code!" << endl;
+        cerr << "Input file doesn't exist. Ensure the file is in the same directory as the code!" << endl; // cerr = cout error msg
         exit(EXIT_FAILURE);
     }
 
-    // Read and clean each line, adding it to `cleaned_code`
+    // Read and clean each line, adding it to cleaned_code
     string line;
     while (getline(infile, line)) {
         string cleaned_line = clean_line(line, static_cast<int>(cleaned_code.size()));
@@ -386,7 +477,7 @@ void first_pass() {
     initialize_opcodes();
     process_labels();
 
-    // Only implement `SET` instructions if there are no errors
+    // Only implement SET instructions if there are no errors
     if (error_list.empty()) {
         implement_set_instruction();
     }
@@ -400,9 +491,9 @@ void first_pass() {
     function_to_create_asm_table();
 }
 
-bool open_log_file(ofstream& error_file) {
-    const string log_filename = "logFile.log";
-    error_file.open(log_filename);
+bool open_log_file(ofstream& error_file) {          // handling output file streams
+    const string log_filename = "logFile.log";      // Specify the name of the log file
+    error_file.open(log_filename);                  // Attempt to open the file in write mode
     if (!error_file) {
         cerr << "Error: Could not open log file for writing." << endl;
         return false;
@@ -410,30 +501,63 @@ bool open_log_file(ofstream& error_file) {
     return true;
 }
 
+
 void write_success_log(ofstream& error_file) {
-    error_file << "++++++ A S S E M B L Y   L O G ++++++" << endl;
-    cout << "YAYY!! The assembly was successfully completed. No errors found!! Well Done!" << endl;
-    
+    // Print the assembly log header
+    string header = "****** A S S E M B L Y   L O G ******";
+    error_file << header << endl;
+    cout << header << endl << endl;
+
+    // Display success message
+    string success_message = "Assembly completed successfully. No errors detected!";
+    cout << left << setw(10) << "STATUS" << "| " << success_message << endl;
+    error_file << "STATUS: " << success_message << endl;
+
+    // Display a warning if HALT instruction is missing
     if (!is_halt_present) {
-    cout << "Warning: It appears that the program lacks a HALT instruction, which is essential for proper termination of the program. Please verify if the absence of this instruction is intentional or an oversight." << endl;
-    error_file << "[WARNING] The program does not contain a HALT instruction, which may result in the program running indefinitely or terminating unexpectedly. Please ensure that this instruction is included in the program for proper execution." << endl;
-}
+        string halt_warning = "Warning: HALT instruction missing.";
+        string halt_detail = "A HALT instruction is required for proper termination. "
+                             "Please check if its omission was intentional.";
+                             
+        cout << left << setw(10) << "WARNING" << "| " << halt_warning << endl;
+        cout << left << setw(10) << "" << "| " << halt_detail << endl;
 
-error_file << "The following output files have been successfully generated as part of the assembly process. These files are crucial for further analysis and execution of the compiled program:" << endl;
-error_file << " - The machine code file: 'machineCode.o' contains the binary instructions that the computer will execute." << endl;
-error_file << " - The listing code file: 'listCode.l' provides a detailed listing of the assembly program, including the original source code along with the corresponding machine code." << endl;
+        error_file << "WARNING: " << halt_warning << endl;
+        error_file << "         " << halt_detail << endl;
+    }
 
+    // Display output files information
+    cout << endl << left << setw(30) << "Output Files" << "| Description" << endl;
+    cout << string(60, '-') << endl;
+    
+    cout << left << setw(30) << " - machineCode.o" 
+         << "| Contains binary instructions for execution." << endl;
+    cout << left << setw(30) << " - listCode.l" 
+         << "| Lists assembly code with machine code." << endl;
+
+    error_file << "\nOutput Files Generated:" << endl;
+    error_file << " - machineCode.o: Contains binary instructions for execution." << endl;
+    error_file << " - listCode.l: Lists assembly code with corresponding machine code." << endl;
 }
 
 void write_error_log(ofstream& error_file) {
+    // Print header for the error log
     error_file << "++++++ A S S E M B L Y   L O G ++++++" << endl;
-    error_file << "+*+*+* E R R O R S +*+*+*" << endl;
-    
+    error_file << "+++* E R R O R S +++*" << endl << endl;
+
+    // Sort error_list based on line numbers
     sort(error_list.begin(), error_list.end());
+
+    // Display error count to console
     cout << "Assembly encountered " << error_list.size() << " error(s). Check log file for details." << endl;
-    
+
+    // Print table headers to the error file
+    error_file << left << setw(10) << "Line" << "| " << "Description" << endl;
+    error_file << string(50, '-') << endl;
+
+    // Print each error in a formatted row
     for (const auto& error : error_list) {
-        error_file << error.second << endl;
+        error_file << left << setw(10) << error.first << "| " << error.second << endl;
     }
 }
 
@@ -464,7 +588,7 @@ string pad_zeroes(string s, int length) {
 // Helper function for generating machine code when operand type is 1
 string function_to_generate_relative_machine_code(int i) {
     int decimal_value = (opcode_map[asm_data[i].mnemonic].second == 2)
-                            ? label_map[asm_data[i].operand] - (program_counters[i] + 1)
+                            ? label_map[asm_data[i].operand] - (program_counters[i] + 1) //relative
                             : label_map[asm_data[i].operand];
     return pad_zeroes(decimal_to_hexadecimal_conversion(decimal_value)) + opcode_map[asm_data[i].mnemonic].first;
 }
@@ -482,25 +606,25 @@ string generate_data_or_constant_machine_code(int i) {
     return pad_zeroes(decimal_to_hexadecimal_conversion(decimal_value, bit_length), hex_length) + opcode_map[asm_data[i].mnemonic].first;
 }
 
-// The main function, `second_pass`, which now uses helper functions for clarity
-void second_pass() {
+// The main function, second_pass, which now uses helper functions for clarity
+void second_pass() {  //assembly code into machine code
     for (int i = 0; i < asm_data.size(); i++) {
         if (cleaned_code[i].empty()) {
             continue;  // Skip empty lines
         }
 
-        string machine_code;
+        string machine_code; //to store the generated machine code for the current line
 
         // Check if the mnemonic is empty and handle accordingly
-        if (asm_data[i].mnemonic.empty()) {
+        if (asm_data[i].mnemonic.empty()) {   //empty mnemonic means that the line is a label or an empty statement
             machine_code = "        ";
         } else {
             // Generate machine code based on operand type
-            if (asm_data[i].operand_type == 1) {
+            if (asm_data[i].operand_type == 1) {  //If the operand type is 1, the instruction is likely a branch or jump instruction that requires a relative address
                 machine_code = function_to_generate_relative_machine_code(i);
-            } else if (asm_data[i].operand_type == 0) {
+            } else if (asm_data[i].operand_type == 0) { //If the operand type is 0, the instruction doesn't have an operand (e.g., HALT)
                 machine_code = generate_no_operand_machine_code(i);
-            } else {
+            } else { //the instruction might be related to data or constants
                 machine_code = generate_data_or_constant_machine_code(i);
             }
         }
@@ -520,7 +644,7 @@ void write_listing_file(const string& filename) {
     }
 
     for (const auto& code : machine_code_list) {
-        string address = pad_zeroes(decimal_to_hexadecimal_conversion(program_counters[code.first]));
+        string address = pad_zeroes(decimal_to_hexadecimal_conversion(program_counters[code.first])); //dec to hex is to convert PC (address) & pad zero to ensure 8 digit ka number bane 
         listing_file << address << " " << code.second << " " << cleaned_code[code.first] << endl;
     }
     listing_file.close();
@@ -535,7 +659,7 @@ void write_machine_code_file(const string& filename) {
     }
 
     for (const auto& code : machine_code_list) {
-        if (code.second.empty() || code.second == "        ") {
+        if (code.second.empty() || code.second == "        ") { //code.first is the line index & code.second is the machine code
             continue;  // Skip empty or placeholder codes
         }
 
@@ -548,7 +672,7 @@ void write_machine_code_file(const string& filename) {
             continue;
         }
 
-        machine_file.write(reinterpret_cast<const char*>(&code_value), sizeof(unsigned int));
+        machine_file.write(reinterpret_cast<const char*>(&code_value), sizeof(unsigned int)); // used to treat the address of code_value as a pointer to a char
     }
     machine_file.close();
 }
@@ -564,50 +688,4 @@ void write_output_files() {
     cout << "Log code of the oeprations has been generated in: logFile.log" << endl;
     cout << "Machine code has been generated in: " << machine_filename << endl;
     cout << "Listing code has been generated in: " << listing_filename << endl;
-}
-
-bool is_octal(string s) {
-    // Check if string is non-empty and starts with '0'
-    if (s.size() < 2 || s[0] != '0') return false;
-    
-    // Ensure all characters are between '0' and '7'
-    for (int i = 1; i < s.size(); i++) {
-        if (s[i] < '0' || s[i] > '7') return false;
-    }
-    return true;
-}
-
-bool is_hexadecimal(string s) {
-    // Check if the string has "0x" or "0X" prefix and enough length
-    if (s.size() < 3 || s[0] != '0' || (s[1] != 'x' && s[1] != 'X')) return false;
-    
-    // Ensure all characters after "0x" are valid hex digits
-    for (int i = 2; i < s.size(); i++) {
-        if (!((s[i] >= '0' && s[i] <= '9') || 
-              (s[i] >= 'a' && s[i] <= 'f') || 
-              (s[i] >= 'A' && s[i] <= 'F'))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool is_decimal(string s) {
-    // Ensure all characters are digits
-    if (s.empty()) return false;
-    for (char ch : s) {
-        if (!isdigit(ch)) return false;
-    }
-    return true;
-}
-
-bool is_valid_label(string label) {
-    // Check that label is non-empty and starts with a letter or underscore
-    if (label.empty() || !(isalpha(label[0]) || label[0] == '_')) return false;
-    
-    // Ensure all characters are alphanumeric or underscore
-    for (char ch : label) {
-        if (!(isalnum(ch) || ch == '_')) return false;
-    }
-    return true;   // this implies that it's a valid label
-}
+} 
